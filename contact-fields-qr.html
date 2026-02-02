@@ -1,0 +1,382 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact QR Generator (vCard PRO)</title>
+
+<style>
+:root{
+  --bg1:#4f46e5; --bg2:#7c3aed;
+  --card:#ffffffd9; --text:#111827; --muted:#6b7280;
+  --border:#e5e7eb; --shadow:0 30px 60px rgba(0,0,0,.25);
+}
+body.dark{
+  --bg1:#020617; --bg2:#0f172a;
+  --card:#020617e6; --text:#e5e7eb; --muted:#94a3b8;
+  --border:#1e293b; --shadow:0 30px 60px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh;
+  display:flex; justify-content:center; align-items:center;
+  font-family:system-ui,Segoe UI,Roboto,Arial;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  padding:24px; color:var(--text);
+}
+.themeToggle{
+  position:fixed; top:20px; right:20px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:999px; padding:10px 14px; cursor:pointer;
+}
+.wrap{
+  width:min(1200px,100%);
+  display:grid; grid-template-columns:1.15fr .85fr; gap:20px;
+}
+.card{
+  background:var(--card); border:1px solid var(--border);
+  border-radius:18px; box-shadow:var(--shadow); padding:22px;
+}
+.header{display:flex;justify-content:space-between;margin-bottom:14px;gap:10px}
+.title h1{margin:0;font-size:20px}
+.title p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+.badge{background:#6366f1;color:#fff;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap}
+
+label{font-size:12px;color:var(--muted);margin:12px 0 6px;display:block}
+input, textarea{
+  width:100%; padding:14px; border-radius:14px;
+  border:1px solid var(--border); font-size:14px;
+  background:#fff; outline:none;
+}
+textarea{resize:vertical; min-height:70px}
+body.dark input, body.dark textarea{background:#020617;color:#e5e7eb}
+input:focus, textarea:focus{
+  border-color:#6366f1;
+  box-shadow:0 0 0 4px rgba(99,102,241,.18);
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+
+button{
+  border:none; border-radius:14px; padding:14px;
+  font-weight:700; cursor:pointer;
+}
+.primary{background:#6366f1;color:#fff}
+.status{margin-top:12px;font-size:12px;color:var(--muted);line-height:1.35}
+
+.rightCard{display:flex;flex-direction:column;gap:16px}
+.qrBox{
+  background:#fff; border-radius:20px; padding:20px;
+  min-height:320px; display:flex; flex-direction:column; align-items:center;
+}
+body.dark .qrBox{background:#020617}
+
+.bulkList{max-height:360px;overflow:auto;width:100%}
+.bulkItem{margin-bottom:16px;text-align:center}
+.bulkItem strong{display:block;margin-bottom:6px}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-png{background:#e5e7eb}
+body.dark .btn-png{background:#1e293b;color:#e5e7eb}
+.btn-svg{background:#22c55e;color:#fff}
+button:disabled{opacity:.55;cursor:not-allowed}
+
+@media(max-width:980px){
+  .wrap{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body class="">
+<button class="themeToggle" id="themeToggle">🌙 Dark</button>
+
+<div class="wrap">
+
+  <!-- LEFT -->
+  <div class="card">
+    <div class="header">
+      <div class="title">
+        <h1>Contact QR</h1>
+        <p>vCard QR with Company, Email, Website, Address, GitHub, LinkedIn</p>
+      </div>
+      <div class="badge">vCard PRO</div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label>Name *</label>
+        <input id="nameInput" placeholder="Full Name">
+      </div>
+      <div>
+        <label>Phone *</label>
+        <input id="phoneInput" placeholder="+91 9876543210">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label>Company</label>
+        <input id="companyInput" placeholder="Company name">
+      </div>
+      <div>
+        <label>Email</label>
+        <input id="emailInput" placeholder="name@email.com">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label>Website</label>
+        <input id="websiteInput" placeholder="https://yourwebsite.com">
+      </div>
+      <div>
+        <label>LinkedIn</label>
+        <input id="linkedinInput" placeholder="https://www.linkedin.com/in/username">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label>GitHub</label>
+        <input id="githubInput" placeholder="https://github.com/username">
+      </div>
+      <div>
+        <label>Address</label>
+        <input id="addressInput" placeholder="City, State, Country">
+      </div>
+    </div>
+
+    <button class="primary" id="generateSingle" style="margin-top:14px">⚡ Generate Single QR</button>
+
+    <label style="margin-top:18px">Upload Contacts JSON</label>
+    <input type="file" id="jsonInput" accept=".json">
+
+    <div class="status" id="statusText">
+      Tip: PNG / SVG buttons will download ALL QRs (bulk) or the single QR.
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="card rightCard">
+    <div class="qrBox">
+      <strong>QR Preview</strong>
+      <div id="qrcode"></div>
+      <div class="bulkList" id="bulkList"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-png" id="pngBtn" disabled="">🖼️ PNG</button>
+      <button class="btn-svg" id="svgBtn" disabled="">⬇️ SVG</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+<script>
+/* THEME */
+const themeToggle = document.getElementById("themeToggle");
+if (localStorage.theme === "dark") {
+  document.body.classList.add("dark");
+  themeToggle.textContent = "☀️ Light";
+}
+themeToggle.onclick = () => {
+  document.body.classList.toggle("dark");
+  const dark = document.body.classList.contains("dark");
+  localStorage.theme = dark ? "dark" : "light";
+  themeToggle.textContent = dark ? "☀️ Light" : "🌙 Dark";
+};
+
+/* ELEMENTS */
+const qrBox = document.getElementById("qrcode");
+const bulkList = document.getElementById("bulkList");
+const pngBtn = document.getElementById("pngBtn");
+const svgBtn = document.getElementById("svgBtn");
+const statusText = document.getElementById("statusText");
+
+const nameInput = document.getElementById("nameInput");
+const phoneInput = document.getElementById("phoneInput");
+const companyInput = document.getElementById("companyInput");
+const emailInput = document.getElementById("emailInput");
+const websiteInput = document.getElementById("websiteInput");
+const addressInput = document.getElementById("addressInput");
+const githubInput = document.getElementById("githubInput");
+const linkedinInput = document.getElementById("linkedinInput");
+
+let bulkContacts = [];
+
+/* HELPERS */
+function sanitizePhone(p){
+  p = (p || "").toString().trim();
+  if (p.startsWith("+")) return "+" + p.slice(1).replace(/\D/g,"");
+  return p.replace(/\D/g,"");
+}
+function normalizeUrl(u){
+  u = (u || "").toString().trim();
+  if (!u) return "";
+  if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+  return u;
+}
+function safeName(n){
+  return (n || "contact").toString().trim().replace(/\s+/g,"_").toLowerCase();
+}
+function escVCard(value){
+  // vCard escaping for special chars
+  return (value || "")
+    .toString()
+    .replace(/\\/g,"\\\\")
+    .replace(/\n/g,"\\n")
+    .replace(/;/g,"\\;")
+    .replace(/,/g,"\\,")
+    .trim();
+}
+
+function buildVCard(data){
+  const n = escVCard(data.name);
+  const phone = escVCard(data.phone);
+  const org = escVCard(data.company);
+  const email = escVCard(data.email);
+  const website = escVCard(data.website);
+  const addr = escVCard(data.address);
+  const github = escVCard(data.github);
+  const linkedin = escVCard(data.linkedin);
+
+  const lines = [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    `N:${n};;;;`,
+    `FN:${n}`,
+    `TEL;TYPE=CELL:${phone}`
+  ];
+
+  if (org) lines.push(`ORG:${org}`);
+  if (email) lines.push(`EMAIL;TYPE=INTERNET:${email}`);
+  if (website) lines.push(`URL:${website}`);
+
+  // Address: ADR;TYPE=HOME:;;street;city;region;postal;country
+  // We only have single string, so we put into "street" slot.
+  if (addr) lines.push(`ADR;TYPE=HOME:;;${addr};;;;`);
+
+  // Social profiles (supported in Apple Contacts / some apps)
+  if (github) lines.push(`X-SOCIALPROFILE;TYPE=github:${github}`);
+  if (linkedin) lines.push(`X-SOCIALPROFILE;TYPE=linkedin:${linkedin}`);
+
+  // Fallback notes for apps that don't map X-SOCIALPROFILE
+  const noteParts = [];
+  if (github) noteParts.push(`GitHub: ${github}`);
+  if (linkedin) noteParts.push(`LinkedIn: ${linkedin}`);
+  if (noteParts.length) lines.push(`NOTE:${escVCard(noteParts.join(" | "))}`);
+
+  lines.push("END:VCARD");
+  return lines.join("\n");
+}
+
+/* SINGLE QR */
+const singleQR = new QRCodeStyling({
+  width: 240,
+  height: 240,
+  type: "svg",
+  dotsOptions: { color:"#111827", type:"rounded" },
+  backgroundOptions: { color:"transparent" }
+});
+
+function getSingleFormData(){
+  return {
+    name: (nameInput.value || "").trim(),
+    phone: sanitizePhone(phoneInput.value || ""),
+    company: (companyInput.value || "").trim(),
+    email: (emailInput.value || "").trim(),
+    website: normalizeUrl(websiteInput.value || ""),
+    address: (addressInput.value || "").trim(),
+    github: normalizeUrl(githubInput.value || ""),
+    linkedin: normalizeUrl(linkedinInput.value || "")
+  };
+}
+
+document.getElementById("generateSingle").onclick = () => {
+  const d = getSingleFormData();
+  if (!d.name) return alert("Please enter Name");
+  if (!d.phone || d.phone.length < 8) return alert("Please enter valid Phone");
+
+  bulkContacts = [];
+  bulkList.innerHTML = "";
+
+  singleQR.update({ data: buildVCard(d) });
+  qrBox.innerHTML = "";
+  singleQR.append(qrBox);
+
+  pngBtn.disabled = false;
+  svgBtn.disabled = false;
+  statusText.textContent = "✅ Single vCard QR ready (with extra fields).";
+};
+
+/* BULK JSON */
+document.getElementById("jsonInput").onchange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  try{
+    const raw = JSON.parse(await file.text());
+    if (!Array.isArray(raw)) throw new Error("JSON must be an array");
+
+    // normalize
+    bulkContacts = raw.map(x => ({
+      name: (x?.name || "").toString().trim(),
+      phone: sanitizePhone(x?.phone || ""),
+      company: (x?.company || "").toString().trim(),
+      email: (x?.email || "").toString().trim(),
+      website: normalizeUrl(x?.website || ""),
+      address: (x?.address || "").toString().trim(),
+      github: normalizeUrl(x?.github || ""),
+      linkedin: normalizeUrl(x?.linkedin || "")
+    })).filter(x => x.name && x.phone && x.phone.length >= 8);
+
+    qrBox.innerHTML = "";
+    bulkList.innerHTML = "";
+
+    bulkContacts.forEach((c,i) => {
+      const div = document.createElement("div");
+      div.className = "bulkItem";
+      div.innerHTML = `<strong>${i+1}. ${c.name}</strong>`;
+      bulkList.appendChild(div);
+    });
+
+    pngBtn.disabled = bulkContacts.length === 0;
+    svgBtn.disabled = bulkContacts.length === 0;
+    statusText.textContent = `✅ ${bulkContacts.length} contacts loaded (with extra fields).`;
+  }catch(err){
+    alert("Invalid JSON file format.");
+  }
+};
+
+/* DOWNLOAD: bulk or single */
+async function downloadAll(type){
+  if (bulkContacts.length){
+    statusText.textContent = `⬇️ Downloading ${bulkContacts.length} ${type.toUpperCase()} files...`;
+    for (const c of bulkContacts){
+      const qr = new QRCodeStyling({
+        width: 240,
+        height: 240,
+        type: "svg",
+        dotsOptions: { color:"#111827", type:"rounded" },
+        backgroundOptions: { color:"transparent" },
+        data: buildVCard(c)
+      });
+      await qr.download({ name: safeName(c.name), extension: type });
+    }
+    statusText.textContent = `✅ Downloaded all ${type.toUpperCase()} files.`;
+  } else {
+    await singleQR.download({ name: "contact-qr", extension: type });
+  }
+}
+
+pngBtn.onclick = () => downloadAll("png");
+svgBtn.onclick = () => downloadAll("svg");
+</script>
+
+
+
+</body></html>
