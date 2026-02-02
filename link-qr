@@ -1,0 +1,498 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vector Link QR Generator</title>
+
+  <style>
+    :root{
+      /* background */
+      --bg1:#5b62ff;
+      --bg2:#7b3ff6;
+
+      /* panels */
+      --panel:#e9e7ff;
+      --panelInner: rgba(255,255,255,.25);
+      --card:#ffffff;
+
+      /* text */
+      --text:#111827;
+      --muted:#6b7280;
+
+      /* buttons */
+      --primary:#6f63ff;
+      --primary2:#7c3aed;
+      --success:#79c89a;
+
+      /* ui */
+      --shadow: 0 18px 40px rgba(0,0,0,.18);
+      --radius: 22px;
+    }
+
+    /* Dark mode overrides */
+    body.dark{
+      --bg1:#020617;
+      --bg2:#0f172a;
+
+      --panel: rgba(2,6,23,.65);
+      --panelInner: rgba(255,255,255,.06);
+      --card:#0b1220;
+
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+
+      --shadow: 0 22px 55px rgba(0,0,0,.55);
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(255,255,255,.14), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      padding: 26px;
+      color: var(--text);
+      transition: background .25s ease, color .25s ease;
+    }
+
+    .themeToggle{
+      position:fixed;
+      top:18px;
+      right:18px;
+      border:none;
+      cursor:pointer;
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:700;
+      font-size:13px;
+      color: var(--text);
+      background: rgba(255,255,255,.65);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+      transition: .2s ease;
+    }
+    body.dark .themeToggle{
+      background: rgba(2,6,23,.55);
+      box-shadow: 0 16px 30px rgba(0,0,0,.45);
+    }
+
+    .wrap{
+      width: min(1100px, 100%);
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 22px;
+    }
+
+    .panel{
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      transition: .25s ease;
+    }
+
+    .panel-inner{
+      background: var(--panelInner);
+      border-radius: calc(var(--radius) - 6px);
+      padding: 18px;
+      transition: .25s ease;
+    }
+
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .title h1{
+      margin:0;
+      font-size: 24px;
+      letter-spacing: .2px;
+    }
+
+    .title p{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .pro{
+      background: linear-gradient(135deg, #6f63ff, #8b5cf6);
+      color:#fff;
+      font-size: 12px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      box-shadow: 0 10px 20px rgba(111,99,255,.25);
+      white-space: nowrap;
+      align-self:flex-start;
+    }
+
+    label{
+      display:block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 12px 0 8px;
+    }
+
+    input{
+      width:100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(17,24,39,.08);
+      outline:none;
+      font-size: 15px;
+      background: #fff;
+      color: #111827;
+      transition: .2s ease;
+    }
+    body.dark input{
+      background: rgba(11,18,32,.9);
+      color: var(--text);
+      border: 1px solid rgba(148,163,184,.18);
+    }
+
+    input:focus{
+      border-color: rgba(111,99,255,.6);
+      box-shadow: 0 0 0 4px rgba(111,99,255,.18);
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    button.btn{
+      border:none;
+      border-radius: 16px;
+      padding: 14px 14px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      transition: transform .08s ease, filter .18s ease, background .2s ease, color .2s ease;
+      user-select:none;
+    }
+    button.btn:active{ transform: translateY(1px); }
+    button.btn:disabled{
+      cursor:not-allowed;
+      opacity:.45;
+      filter: grayscale(.15);
+    }
+
+    .btn-primary{
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color:#fff;
+      box-shadow: 0 14px 26px rgba(111,99,255,.28);
+    }
+
+    .btn-ghost{
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 10px 18px rgba(0,0,0,.06);
+    }
+    body.dark .btn-ghost{
+      background: rgba(11,18,32,.9);
+      color: var(--text);
+      box-shadow: 0 10px 18px rgba(0,0,0,.25);
+    }
+
+    .tip{
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Right panel */
+    .preview-card{
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      display:flex;
+      flex-direction:column;
+      gap: 18px;
+      transition: .25s ease;
+    }
+
+    .preview-box{
+      background: #fff;
+      border-radius: 24px;
+      padding: 26px 18px;
+      min-height: 360px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      transition: .25s ease;
+    }
+    body.dark .preview-box{
+      background: rgba(11,18,32,.9);
+    }
+
+    .preview-title{
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .preview-sub{
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    #qrcode{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      margin-top: 10px;
+    }
+
+    .linkHint{
+      margin-top: 14px;
+      font-size: 12.5px;
+      color: var(--muted);
+      word-break: break-word;
+      max-width: 92%;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .btn-open{
+      background: #f3f2ff;
+      color: #7c3aed;
+      box-shadow: 0 10px 18px rgba(0,0,0,.06);
+    }
+    body.dark .btn-open{
+      background: rgba(243,242,255,.08);
+      color: #c4b5fd;
+      box-shadow: 0 10px 18px rgba(0,0,0,.25);
+    }
+
+    .btn-download{
+      background: var(--success);
+      color: #fff;
+      box-shadow: 0 14px 26px rgba(121,200,154,.28);
+    }
+
+    @media (max-width: 920px){
+      .wrap{ grid-template-columns: 1fr; }
+      .preview-box{ min-height: 300px; }
+      .actions{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="themeToggle" id="themeToggle" type="button" onclick="toggleTheme()">🌙 Dark</button>
+
+  <div class="wrap">
+    <!-- LEFT -->
+    <div class="panel">
+      <div class="panel-inner">
+        <div class="header">
+          <div class="title">
+            <h1>Link QR Generator</h1>
+            <p>Premium QR generator with vector output (SVG)</p>
+          </div>
+          <div class="pro">PRO</div>
+        </div>
+
+        <label for="urlInput">Paste your link</label>
+        <input id="urlInput" placeholder="https://example.com">
+
+        <div class="grid2">
+          <button class="btn btn-primary" id="genBtn" type="button" onclick="generateQR()">⚡ Generate</button>
+          <button class="btn btn-ghost" type="button" onclick="clearAll()">🧹 Clear</button>
+        </div>
+
+        <div class="grid2" style="margin-top:14px;">
+          <button class="btn btn-ghost" type="button" onclick="copyLink()">📋 Copy</button>
+          <button class="btn btn-ghost" type="button" onclick="pasteLink()">📥 Paste</button>
+        </div>
+
+        <div class="tip" id="statusText">Tip: https:// is added automatically</div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="preview-card">
+      <div class="preview-box">
+        <div class="preview-title">QR Preview</div>
+        <div class="preview-sub" id="emptyText">No QR generated yet</div>
+
+        <div id="qrcode"></div>
+        <div class="linkHint" id="qrHint" style="display:none;"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-open" id="openBtn" type="button" onclick="openLink()" disabled="">🔗 Open</button>
+        <button class="btn btn-ghost" id="downloadPngBtn" type="button" onclick="downloadPNG()" disabled="">🖼️ PNG</button>
+        <button class="btn btn-download" id="downloadSvgBtn" type="button" onclick="downloadSVG()" disabled="">⬇️ SVG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VECTOR QR LIB (SVG) -->
+  <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
+  <script>
+    let currentUrl = "";
+
+    // Theme init (persist)
+    const themeToggleBtn = document.getElementById("themeToggle");
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+      themeToggleBtn.textContent = "☀️ Light";
+    }
+
+    function toggleTheme(){
+      document.body.classList.toggle("dark");
+      const dark = document.body.classList.contains("dark");
+      localStorage.setItem("theme", dark ? "dark" : "light");
+      themeToggleBtn.textContent = dark ? "☀️ Light" : "🌙 Dark";
+
+      // Optional: update QR color for dark mode (keeps QR always scannable)
+      // We keep it black by default because it prints best.
+      // If you want light dots in dark mode, uncomment below:
+      // if (currentUrl) {
+      //   qrCode.update({ dotsOptions: { color: dark ? "#e5e7eb" : "#111827" } });
+      //   rerenderQR();
+      // }
+    }
+
+    function setStatus(msg){ document.getElementById("statusText").textContent = msg; }
+
+    function normalizeUrl(raw){
+      let url = (raw || "").trim();
+      if(!url) return "";
+      if(!/^https?:\/\//i.test(url)) url = "https://" + url;
+      return url;
+    }
+
+    function isValidUrl(url){
+      try { new URL(url); return true; } catch { return false; }
+    }
+
+    // Create ONE qr instance (SVG)
+    const qrCode = new QRCodeStyling({
+      width: 260,
+      height: 260,
+      type: "svg", // ✅ vector
+      data: "",
+      dotsOptions: { color: "#111827", type: "rounded" },
+      cornersSquareOptions: { type: "extra-rounded" },
+      cornersDotOptions: { type: "dot" },
+      backgroundOptions: { color: "transparent" }
+    });
+
+    function rerenderQR(){
+      const box = document.getElementById("qrcode");
+      box.innerHTML = "";
+      qrCode.append(box);
+    }
+
+    function generateQR(){
+      const input = document.getElementById("urlInput");
+      const url = normalizeUrl(input.value);
+
+      if(!url) return setStatus("❌ Paste a link first");
+      if(!isValidUrl(url)) return setStatus("❌ Invalid link");
+
+      input.value = url;
+      currentUrl = url;
+
+      // Update QR vector data
+      qrCode.update({ data: url });
+
+      // Render
+      rerenderQR();
+
+      document.getElementById("emptyText").style.display = "none";
+      const hint = document.getElementById("qrHint");
+      hint.style.display = "block";
+      hint.textContent = url;
+
+      document.getElementById("openBtn").disabled = false;
+      document.getElementById("downloadSvgBtn").disabled = false;
+      document.getElementById("downloadPngBtn").disabled = false;
+
+      setStatus("✅ Vector QR generated (SVG)");
+    }
+
+    function clearAll(){
+      currentUrl = "";
+      document.getElementById("urlInput").value = "";
+      document.getElementById("qrcode").innerHTML = "";
+      document.getElementById("emptyText").style.display = "block";
+      document.getElementById("qrHint").style.display = "none";
+
+      document.getElementById("openBtn").disabled = true;
+      document.getElementById("downloadSvgBtn").disabled = true;
+      document.getElementById("downloadPngBtn").disabled = true;
+
+      setStatus("Tip: https:// is added automatically");
+    }
+
+    function openLink(){
+      if(!currentUrl) return;
+      window.open(currentUrl, "_blank", "noopener");
+    }
+
+    async function copyLink(){
+      const val = document.getElementById("urlInput").value.trim();
+      if(!val) return setStatus("❌ Nothing to copy");
+      try{
+        await navigator.clipboard.writeText(val);
+        setStatus("✅ Copied");
+      }catch{
+        setStatus("⚠️ Copy blocked by browser permission");
+      }
+    }
+
+    async function pasteLink(){
+      try{
+        const text = await navigator.clipboard.readText();
+        if(!text) return setStatus("⚠️ Clipboard empty");
+        document.getElementById("urlInput").value = text.trim();
+        setStatus("✅ Pasted. Click Generate");
+      }catch{
+        setStatus("⚠️ Paste blocked by browser permission");
+      }
+    }
+
+    function downloadSVG(){
+      // ✅ true vector .svg
+      qrCode.download({ name: "qr-vector", extension: "svg" });
+    }
+
+    function downloadPNG(){
+      // ✅ png export from the same QR
+      qrCode.download({ name: "qr-image", extension: "png" });
+    }
+
+    // Enter to generate
+    document.getElementById("urlInput").addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") generateQR();
+    });
+  </script>
+
+
+</body></html>
