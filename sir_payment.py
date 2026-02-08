@@ -1,7 +1,7 @@
 import qrcode
 from urllib.parse import quote
 
-UPI_ID = "enhan94922@barodampay"  # fixed UPI ID in the QR
+UPI_ID = "rohinibarla@ybl"  # fixed UPI ID in the QR
 
 def create_upi_payment_qr():
     print("===Send money to sir===")
@@ -10,7 +10,7 @@ def create_upi_payment_qr():
 
     payee_name = input("Enter Payee Name (pn): ").strip()  # user enters this
     amount_str = input("Enter Amount (INR) [optional, ex: 150.50]: ").strip()
-    note = input("Enter Note (optional, ex: Fee/Donation): ").strip()
+    #note = input("Enter Note (optional, ex: Fee/Donation): ").strip()
 
     if not payee_name:
         print("❌ Payee Name is required.")
@@ -30,8 +30,6 @@ def create_upi_payment_qr():
 
     # Build UPI URI
     uri = f"upi://pay?pa={quote(UPI_ID)}&pn={quote(payee_name)}"
-    if note:
-        uri += f"&tn={quote(note)}"
     uri += f"{amount_param}&cu=INR"
 
     # Generate QR
