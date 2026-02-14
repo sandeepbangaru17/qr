@@ -340,7 +340,9 @@ document.getElementById("jsonInput").onchange = async (e) => {
     bulkContacts.forEach((c,i) => {
       const div = document.createElement("div");
       div.className = "bulkItem";
-      div.innerHTML = `<strong>${i+1}. ${c.name}</strong>`;
+      const strong = document.createElement("strong");
+      strong.textContent = `${i + 1}. ${c.name}`;
+      div.appendChild(strong);
       bulkList.appendChild(div);
     });
 
